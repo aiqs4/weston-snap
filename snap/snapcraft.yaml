@@ -30,25 +30,31 @@ environment:
   SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET}
   #
   XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb
+  XKB_LOG_LEVEL: 50
+  XKB_LOG_VERBOSITY: 10
   # XDG config
-  XDG_CACHE_HOME:  $SNAP_USER_COMMON/.cache
+  XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
   XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
   XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
   # Prep EGL
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d
   LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
   LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  # Prep GDK
+  GDK_BACKEND: wayland
+  # GDK_PIXBUF_MODULEDIR
+  # GDK_PIXBUF_MODULE_FILE
   # Setup Weston
   WAYLAND_DEBUG: 1
   # WAYLAND_DISPLAY: 
 
   # WESTON_CONFIG_FILE
-  # WESTON_LIBINPUT_LOG_PRIORITY
+  WESTON_LIBINPUT_LOG_PRIORITY: debug
   # WESTON_DATA_DIR
   # WESTON_CONFIG_FILE_ENV_VAR
   # TODO: this is set in startup-script
-  WESTON_MODULE_MAP: drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so;fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so;gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so;headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so;wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so;x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so;xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so;desktop-shell.so:${SNAP}/usr/lib/x86_64-linux-gnu/weston/desktop-shell.so
-  SHELL_PLUGIN: /snap/weston/current/usr/lib/x86_64-linux-gnu/weston/desktop-shell.so
+  #WESTON_MODULE_MAP: drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so;fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so;gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so;headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so;wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so;x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so;xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so;desktop-shell.so:${SNAP}/usr/lib/x86_64-linux-gnu/weston/desktop-shell.so
+  #WESTON_MODULE_MAP: drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so;fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so;gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so;headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so;wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so;x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so;xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so;desktop-shell.so:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/weston/desktop-shell.so
   
 
 #slots: [ x11 ]
@@ -62,6 +68,7 @@ layout:
 apps:
   weston:
     command: bin/weston
+    aliases: [ weston ]
   weston-launch: 
     command: bin/weston-launch  
     aliases: [ weston-launch ]
@@ -297,7 +304,7 @@ parts:
   testing:
     plugin: nil
     stage-packages:
-      - xwayland
+      # - xwayland
       - rxvt-unicode
       - x11-apps
       # - suckless-tools

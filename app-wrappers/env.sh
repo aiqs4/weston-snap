@@ -11,7 +11,7 @@ WESTON_MODULE_MAP="${WESTON_MODULE_MAP};weston-keyboard=${SNAP}/usr/libexec/west
 WESTON_MODULE_MAP="${WESTON_MODULE_MAP};weston-screenshooter=${SNAP}/usr/libexec/weston-screenshooter"
 WESTON_MODULE_MAP="${WESTON_MODULE_MAP};weston-simple-im=${SNAP}/usr/libexec/weston-simple-im"
 
-WESTON_MODULE_MAP="${WESTON_MODULE_MAP};desktop-shell.so:${SNAP}/usr/lib/x86_64-linux-gnu/weston/desktop-shell.so"
+WESTON_MODULE_MAP="${WESTON_MODULE_MAP};desktop-shell.so:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/weston/desktop-shell.so"
 
 
 WESTON_MODULE_MAP="${WESTON_MODULE_MAP};fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so"
@@ -23,3 +23,5 @@ WESTON_MODULE_MAP="${WESTON_MODULE_MAP};xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_
 WESTON_MODULE_MAP="${WESTON_MODULE_MAP};drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so"
 
 export WESTON_MODULE_MAP
+
+
