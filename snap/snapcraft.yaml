@@ -1,0 +1,311 @@
+name: weston
+base: core18
+version: '7.0.0-6'
+summary: reference implementation of a wayland compositor (experimental)
+description: |
+  Part of the Wayland project is also the Weston reference implementation
+  of a Wayland compositor. Weston can run as an X client or under Linux
+  KMS and ships with a few demo clients. The Weston compositor is a minimal
+  and fast compositor and is suitable for many embedded and mobile use
+  cases.
+
+# icon: weston.png
+
+# architectures:
+#   - build-on: [amd64, i386]
+#     run-on: [amd64, i386]
+
+#adopt-info: devmode # use 'strict' once you have the right plugs and slots
+
+grade: stable
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+environment:
+  SHELL: bash
+  #
+  LC_ALL: C.UTF-8
+  LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}
+  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
+  # Snap compatibality
+  SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET}
+  #
+  XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb
+  # XDG config
+  XDG_CACHE_HOME:  $SNAP_USER_COMMON/.cache
+  XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
+  XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
+  # Prep EGL
+  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d
+  LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  # Setup Weston
+  WAYLAND_DEBUG: 1
+  # WAYLAND_DISPLAY: 
+
+  # WESTON_CONFIG_FILE
+  # WESTON_LIBINPUT_LOG_PRIORITY
+  # WESTON_DATA_DIR
+  # WESTON_CONFIG_FILE_ENV_VAR
+  # TODO: this is set in startup-script
+  WESTON_MODULE_MAP: drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so;fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so;gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so;headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so;wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so;x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so;xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so;desktop-shell.so:${SNAP}/usr/lib/x86_64-linux-gnu/weston/desktop-shell.so
+  SHELL_PLUGIN: /snap/weston/current/usr/lib/x86_64-linux-gnu/weston/desktop-shell.so
+  
+
+#slots: [ x11 ]
+#plugs: [ x11-plug, opengl, wayland ]
+
+layout:
+  /usr/share:
+    bind: $SNAP/usr/share
+
+
+apps:
+  weston:
+    command: bin/weston
+  weston-launch: 
+    command: bin/weston-launch  
+    aliases: [ weston-launch ]
+  weston-real:
+    command: usr/bin/weston
+    # command-chain:
+    #   - mkdir -p $XDG_RUNTIME_DIR
+    # adapter: full
+    # desktop: usr/share/wayland-sessions/weston.desktop
+    plugs:
+      - desktop
+      - desktop-legacy
+      - x11
+  # wcap-decode:
+  #   command: usr/bin/wcap-decode
+  weston-info:
+    command: usr/bin/weston-info
+    aliases: [ weston-info ]
+  weston-launch-real:
+    command: usr/bin/weston-launch
+    plugs:
+      - desktop
+      - desktop-legacy
+      - x11
+  weston-terminal:
+    command: usr/bin/weston-terminal
+    aliases: [ weston-terminal ]
+
+    # adapter: full
+ 
+# slots:
+#   wayland:
+
+plugs:
+  wayland:
+  desktop:
+  desktop-legacy:
+  x11: 
+  opengl:
+  framebuffer:
+  # dbus:
+  locale-control:
+  login-session-control:
+  home:
+  network:
+  mount-observe:
+  network-observe:
+  system-observe:
+  removable-media:
+  alsa:
+  pulseaudio:
+
+
+parts:
+  app-wrappers:
+    plugin: dump
+    source: app-wrappers/
+    organize: 
+      weston: bin/weston
+      weston-launch: bin/weston-launch
+      env.sh: bin/env.sh
+
+  weston-config:
+    plugin: dump
+    source: weston
+    organize:
+      weston.ini: etc/xdg/.config/weston.ini
+
+  prebuild:
+    plugin: nil
+    build-packages:
+      - cmake # meson likes cmake
+      - pkgconf
+      - quilt
+
+  wayland-protocols:
+    after: [ prebuild ]
+    source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
+    source-tag: '1.18'
+    source-depth: 1
+    plugin: autotools
+    configflags: [ --prefix=/usr ]
+    build-packages:
+      - libwayland-bin
+
+  weston:
+    after: [ wayland-protocols ]
+    #source: https://salsa.debian.org/xorg-team/wayland/weston.git
+    #source-tag: 'weston-6.0.1-2'
+    source: https://github.com/wayland-project/weston.git
+    source-tag: 7.0.0
+    source-depth: 1
+    plugin: meson
+    meson-parameters: 
+      - --prefix=/usr
+      - -Dbackend-drm-screencast-vaapi=false
+
+      - -Dbackend-headless=false
+      - -Dbackend-rdp=false
+
+      - -Dbackend-x11=true
+
+      - -Dscreenshare=false
+
+      - -Dxwayland=true
+
+      - -Dlogind=true
+      - -Dlogind-provider=systemd
+
+      - -Dsystemd=true
+
+      - -Dpipewire=false
+
+      - -Dremoting=false
+
+      - -Dcolor-management-lcms=false
+      - -Dcolor-management-colord=false
+      
+      - -Dlauncher-logind=false
+
+      - -Dimage-jpeg=false
+      - -Dimage-webp=false
+      #      
+      - -Dsimple-dmabuf-drm=intel
+      - -Ddemo-clients=false
+      #- -Dsimple-clients=false
+      - -Dresize-pool=false
+      - -Dwcap-decode=false
+      - -Dtest-junit-xml=false
+      # -Dimage-webp=false
+    # configflags: 
+    #   - --prefix=/usr
+    #install-via: prefix
+    #configflags: [ "--libdir=/snap/weston/current/usr/lib" ]
+    build-packages:
+      - pkgconf
+      - libdbus-1-dev
+      - libpixman-1-dev
+      - libpng-dev
+      - libjpeg-dev
+      - libcolord-dev
+      - libwebp-dev
+      - liblcms2-dev
+      - mesa-common-dev
+      # - libpipewire-0.2-dev
+      - libglu1-mesa-dev
+      - libegl1-mesa-dev
+      - libgles2-mesa-dev
+      - libxcb1-dev
+      - libxcb-composite0-dev
+      - libxcb-shape0-dev
+      - libxcb-xfixes0-dev
+      - libxcb-xkb-dev
+      - libx11-xcb-dev
+      - libx11-dev
+      - libudev-dev
+      - libdrm-dev
+      - libgbm-dev
+      - libxkbcommon-dev
+      - libcairo2-dev
+      - libpango1.0-dev
+      - libgdk-pixbuf2.0-dev
+      - libxcursor-dev
+      - libpam0g-dev
+      - libvpx-dev
+      - libsystemd-dev
+      - libinput-dev
+      # - wayland-protocols
+      ## libweston:
+      - libwayland-dev
+    stage-packages:
+      - libcairo2
+      - libcolord2
+      - libwebp6
+      - libdatrie1
+      - libevdev2
+      - libfontconfig1
+      - libfreetype6
+      - libgraphite2-3
+      - libgudev-1.0-0
+      - libharfbuzz0b
+      - libinput10
+      - libjpeg-turbo8
+      - liblcms2-2
+      - libmtdev1
+      - libpam-modules
+      - libpam-systemd
+      - libpango-1.0-0
+      - libpangocairo-1.0-0
+      - libpangoft2-1.0-0
+      # - libpipewire-0.2-1
+      - libpixman-1-0
+      - libpng16-16
+      - libthai0
+      - libwacom2
+      - libxcb-composite0
+      - libxcb-render0
+      - libxcb-shm0
+      - libxcb-xkb1
+      - libxcursor1
+      - libxkbcommon0
+      - libxrender1
+
+
+  # mesa:
+  #   plugin: nil
+  #   stage-packages:
+  #     - libegl-mesa0
+  #     - libegl1-mesa
+  #     - libgl1-mesa-dri
+  #     - libwayland-egl1-mesa
+  #     - libglu1-mesa
+  #     - mesa-va-drivers
+  #     - mesa-vdpau-drivers
+  #     - mesa-vulkan-drivers
+  #     - libglx-mesa0
+  #     - libglw1-mesa
+
+  egl:
+    plugin: nil
+    stage-packages:
+      - libglvnd0
+      - libegl1
+      - libvdpau-va-gl1
+      #- libvdpau1
+      #- libva-drm2
+      #- vdpau-driver-all
+      #- va-driver-all
+
+      # libxcb-dri2-0
+      # libxcb-dri3-0
+
+  testing:
+    plugin: nil
+    stage-packages:
+      - xwayland
+      - rxvt-unicode
+      - x11-apps
+      # - suckless-tools
+
+  # wayland:
+  #   plugin: nil
+  #   stage-packages:
+  #     - libwayland-egl1 
+  #     - libwayland-client0
+  #     - libwayland-cursor0
+  #     - libwayland-server0
