@@ -1,6 +1,6 @@
-name: weston
+name: weston-strict
 base: core18
-version: '7.0.0-6'
+version: '7.0.0-7'
 summary: reference implementation of a wayland compositor (experimental)
 description: |
   Part of the Wayland project is also the Weston reference implementation
@@ -128,7 +128,7 @@ parts:
     plugin: dump
     source: weston
     organize:
-      weston.ini: etc/xdg/.config/weston.ini
+      weston.ini: etc/xdg/weston/weston.ini
 
   prebuild:
     plugin: nil
