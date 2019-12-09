@@ -1,6 +1,6 @@
-name: weston
+name: weston-strict
 base: core18
-version: '7.0.0-12'
+version: '7.0.0-14'
 summary: reference implementation of a wayland compositor (experimental)
 description: |
   Part of the Wayland project is also the Weston reference implementation
@@ -15,43 +15,31 @@ description: |
 #   - build-on: [amd64, i386]
 #     run-on: [amd64, i386]
 
-#adopt-info: devmode # use 'strict' once you have the right plugs and slots
+#adopt-info: devmode
 
 grade: stable
-confinement: devmode # use 'strict' once you have the right plugs and slots
+confinement: devmode
 
 environment:
   SHELL: bash
   #
   LC_ALL: C.UTF-8
-  LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}
-  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
-  # Snap compatibality
+
+  # --- Snap compatibality ---
   SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET}
-
-  # -- Xkb-Library ---
-  XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb
-  # XKB_LOG_LEVEL: 50
-  # XKB_LOG_VERBOSITY: 10
-
-  # --- XDG config ---
-  XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
-  XDG_CONFIG_DIRS: ${SNAP}/etc/xdg #:$XDG_CONFIG_DIRS
-  XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
 
   # --- Prep EGL ---
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d
-  LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  # LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
   LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
  
   # --- Prep GDK ---
-  GDK_PIXBUF_BINARY_VERSION: '2.10.0' # FIXME: how to get this from installed version ?
   GDK_BACKEND: wayland
-  # FIXME: loaders.cache should be created after install/refresh
-  GDK_PIXBUF_MODULEDIR: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders/
-  # FIXME: generate loaders.cache file ?!
-  # with: gdk-pixbuf-query-loaders > $libdir/gdk-pixbuf-2.0/$binary_version/loaders.cache
-  GDK_PIXBUF_MODULE_FILE: ${SNAP_USER_COMMON}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
+  
+  # TODO: with: gdk-pixbuf-query-loaders > $libdir/gdk-pixbuf-2.0/$binary_version/loaders.cache
+  # GDK_PIXBUF_BINARY_VERSION: '2.10.0' # FIXME: how to get this from installed version ?
+  # GDK_PIXBUF_MODULEDIR: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders/
+  # GDK_PIXBUF_MODULE_FILE: ${SNAP_USER_COMMON}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
 
   # --- Qt ---
   QT_DEBUG_PLUGINS: 1
@@ -69,31 +57,30 @@ environment:
   WESTON_LIBINPUT_LOG_PRIORITY: debug
   # WESTON_DATA_DIR
   # WESTON_CONFIG_FILE_ENV_VAR
+
   # TODO: this is set in startup-script
-  #WESTON_MODULE_MAP: drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so;fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so;gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so;headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so;wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so;x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so;xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so;desktop-shell.so:${SNAP}/usr/lib/x86_64-linux-gnu/weston/desktop-shell.so
-  #WESTON_MODULE_MAP: drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so;fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so;gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so;headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so;wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so;x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so;xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so;desktop-shell.so:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/weston/desktop-shell.so
+  WESTON_MODULE_MAP: weston-desktop-shell=/snap/weston/x5/usr/libexec/weston-desktop-shell;weston-ivi-shell-user-interface=/snap/weston/x5/usr/libexec/weston-ivi-shell-user-interface;weston-keyboard=/snap/weston/x5/usr/libexec/weston-keyboard;weston-screenshooter=/snap/weston/x5/usr/libexec/weston-screenshooter;weston-simple-im=/snap/weston/x5/usr/libexec/weston-simple-im;drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so;fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so;gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so;headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so;wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so;x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so;xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so;desktop-shell.so:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/weston/desktop-shell.so
 
+  # WESTON_MODULE_MAP: ""
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-desktop-shell=${SNAP}/usr/libexec/weston-desktop-shell"
 
-  WESTON_MODULE_MAP: ""
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-desktop-shell=${SNAP}/usr/libexec/weston-desktop-shell"
+  # ## FIXME: TODO: ivi is configureable !
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-ivi-shell-user-interface=${SNAP}/usr/libexec/weston-ivi-shell-user-interface"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-keyboard=${SNAP}/usr/libexec/weston-keyboard"
 
-  ## FIXME: TODO: ivi is configureable !
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-ivi-shell-user-interface=${SNAP}/usr/libexec/weston-ivi-shell-user-interface"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-keyboard=${SNAP}/usr/libexec/weston-keyboard"
+  # ## FIXME: TODO: weston-screenshooter is also configurable !
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-screenshooter=${SNAP}/usr/libexec/weston-screenshooter"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-simple-im=${SNAP}/usr/libexec/weston-simple-im"
 
-  ## FIXME: TODO: weston-screenshooter is also configurable !
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-screenshooter=${SNAP}/usr/libexec/weston-screenshooter"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};weston-simple-im=${SNAP}/usr/libexec/weston-simple-im"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};desktop-shell.so:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/weston/desktop-shell.so"
 
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};desktop-shell.so:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/weston/desktop-shell.so"
-
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so"
-  WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};fbdev-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/fbdev-backend.so"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};gl-renderer.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/gl-renderer.so"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};headless-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/headless-backend.so"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};wayland-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/wayland-backend.so"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};x11-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/x11-backend.so"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};xwayland.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/xwayland.so"
+  # WESTON_MODULE_MAP: "${WESTON_MODULE_MAP};drm-backend.so=${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libweston-7/drm-backend.so"
 
 apps:
   weston:
@@ -102,11 +89,23 @@ apps:
     desktop: usr/share/wayland-sessions/weston.desktop
     extensions:
       - gnome-3-28
+    plugs:
+      - x11
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
   weston-launch: 
     command: usr/bin/weston-launch
     aliases: [ weston-launch ]
     extensions:
       - gnome-3-28
+    plugs:
+      - x11
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
   # wcap-decode:
   #   command: usr/bin/wcap-decode
   weston-info:
@@ -117,7 +116,7 @@ apps:
     aliases: [ weston-terminal ]
 
     # adapter: full
- 
+
 ## TODO: not enabled, because snap-store does not accept unknown interfaces :-(
 # slots:
 #   wayland-server:
@@ -128,19 +127,21 @@ plugs:
   x11:
   desktop:
   desktop-legacy:
+  unity7:
   opengl:
   framebuffer:
   # dbus:
-  # locale-control:
+  locale-control:
   login-session-control:
   home:
   network:
   mount-observe:
   network-observe:
   system-observe:
-  # removable-media:
-  # alsa:
-  # pulseaudio:
+  removable-media:
+  alsa:
+  pulseaudio:
+  gnome:
 
 build-packages:
   - cmake # meson likes cmake
@@ -163,6 +164,7 @@ parts:
     configflags: [ --prefix=/usr ]
     build-packages:
       - libwayland-bin
+
 
   weston:
     after: [ wayland-protocols ]
@@ -201,7 +203,7 @@ parts:
       - -Dimage-webp=true
       #- -Dtools=[ 'calibrator', 'debug', 'info', 'terminal', 'touch-calibrator' ]
       #      
-      - -Dsimple-dmabuf-drm=intel ## FIXME:
+      #- -Dsimple-dmabuf-drm=intel ## FIXME:
       - -Ddemo-clients=false
       #- -Dsimple-clients=['all']
       - -Dresize-pool=false
@@ -236,6 +238,7 @@ parts:
       - libx11-dev
       - libudev-dev
       - libdrm-dev
+      # - libdrm-intel1 ## FIXME: really need to build ?
       - libgbm-dev
       - libxkbcommon-dev
       - libcairo2-dev
@@ -298,19 +301,56 @@ parts:
   #     - libglx-mesa0
   #     - libglw1-mesa
 
-  egl:
+
+  egl: # TODO: check who needs what ...
     plugin: nil
     stage-packages:
+      - libdrm2
+
       - libglvnd0
       - libegl1
       - libvdpau-va-gl1
-      #- libvdpau1
-      #- libva-drm2
-      #- vdpau-driver-all
-      #- va-driver-all
+      # 
+      - libgl1
+      - libgl2ps1.4
+      - libglx0
+      - libgle3
+      - libgles1
+      - libgles2
+      # - libglew2.1
 
-      # libxcb-dri2-0
-      # libxcb-dri3-0
+      - libglbinding2
+
+      - libvdpau1
+      - libva-drm2
+      - vdpau-driver-all
+      - va-driver-all
+      - libxcb-dri2-0
+      - libxcb-dri3-0
+
+      #
+      - libglfw3-wayland
+      - libwayland-egl1
+      # - libwayland-egl++0 ## TODO: not found on core18
+      - on amd64,i386:
+        - libdrm-intel1
+      - try:
+        - libdrm-amdgpu1
+      - try:
+        - libdrm-nouveau2
+      - try:
+        - libdrm-radeon1
+      - try:
+        - libnvidia-egl-wayland1
+
+
+  wayland:
+    plugin: nil
+    stage-packages:
+      - libwayland-egl1 # | libwayland-egl1-mesa
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-server0
 
 
 ## ==========================
@@ -331,7 +371,6 @@ parts:
       - lxterminal
       - qterminal
       - gnome-terminal
-      # - suckless-tools
       # - mate-themes
       # - mate-backgrounds
       # TODO: dev-headers ? or not needed ?
@@ -341,19 +380,6 @@ parts:
       - libtiff5
 
 
-  common:
-    plugin: nil
-    stage-packages:
-      # TODO: dev-headers ? or not needed ?
-      - shared-mime-info
-      - libjpeg8
-      - libpng16-16
-      - libtiff5
-    override-stage: |
-      set -eux
-      update-mime-database ${SNAPCRAFT_STAGE}/usr/share/mime
-      snapcraftctl stage
-
   x11:
     plugin: nil
     stage-packages:
@@ -361,13 +387,13 @@ parts:
       - x11-apps
       - xterm
 
+
   gtk:
     plugin: nil
     stage-packages:
       - gnome-terminal
-      - gir1.2-glib-2.0
-      #
       - lxterminal
+
 
   qt:
     plugin: nil
@@ -376,10 +402,4 @@ parts:
       - qterminal
 
 
-  # wayland:
-  #   plugin: nil
-  #   stage-packages:
-  #     - libwayland-egl1 
-  #     - libwayland-client0
-  #     - libwayland-cursor0
-  #     - libwayland-server0
+
